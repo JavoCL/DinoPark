@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane fx:id="rootPane" minHeight="400.0" minWidth="600.0" prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
+   <top>
+      <Label text="Dino DEX" textAlignment="CENTER" BorderPane.alignment="CENTER">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+         <padding>
+            <Insets bottom="20.0" top="20.0" />
+         </padding>
+      </Label>
+   </top>
+   <bottom>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="btnGuardarJSON" mnemonicParsing="false" onAction="#GuardarJSON" text="Guardar registro JSON">
+               <font>
+                  <Font size="18.0" />
+               </font></Button>
+         </children>
+      </HBox>
+   </bottom>
+   <center>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="CENTER" prefHeight="480.0" prefWidth="719.0">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="258.0" prefWidth="415.0" spacing="25.0">
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="430.0" prefWidth="332.0" spacing="10.0">
+                           <children>
+                              <Label text="Añadir Especie - Carnívoro">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></Label>
+                              <GridPane gridLinesVisible="true">
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <Label text="ID:">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                    <Label text="Nombre especie" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                    <TextField fx:id="txtEspCarnId" GridPane.columnIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></TextField>
+                                    <TextField fx:id="txtEspCarnPeso" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></TextField>
+                                    <ComboBox fx:id="cbEspCarnPeriodo" prefHeight="26.0" prefWidth="168.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></ComboBox>
+                                    <Label text="Periodo:" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                    <Label text="Nivel peligrosidad:" GridPane.rowIndex="4">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                    <ComboBox fx:id="txtEspCarnPeligrosidad" prefHeight="26.0" prefWidth="171.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></ComboBox>
+                                    <TextField fx:id="txtEspCarnNombre" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></TextField>
+                                    <Label text="Peso:" GridPane.rowIndex="3">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                 </children>
+                              </GridPane>
+                              <Button fx:id="btnAgregarEspCarn" mnemonicParsing="false" onAction="#AgregarEspecieCarnivoro" text="Agregar Carnívoro" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="430.0" prefWidth="332.0" spacing="10.0">
+                           <children>
+                              <Label text="Añadir Especie - Hervíboro">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></Label>
+                              <GridPane gridLinesVisible="true">
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <Label text="ID:">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                    <Label text="Nombre especie:" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                    <Label text="Peso:" GridPane.rowIndex="3">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                    <TextField fx:id="txtEspHerbId" GridPane.columnIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></TextField>
+                                    <TextField fx:id="txtEspHerbPeso" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></TextField>
+                                    <ComboBox fx:id="cbEspHerbPeriodo" prefHeight="26.0" prefWidth="169.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></ComboBox>
+                                    <Label text="Tipo planta pref:" GridPane.rowIndex="4">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                    <TextField fx:id="txtEspHerbNombre" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></TextField>
+                                    <TextField fx:id="txtEspHerbTipoPlanta" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></TextField>
+                                    <Label text="Período" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin></Label>
+                                 </children>
+                              </GridPane>
+                              <Button fx:id="btnAgregarEspHerb" mnemonicParsing="false" onAction="#AgregarEspecieHerbivoro" text="Agregar Herbívoro" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="Lista Especies Dinosaurios">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font></Label>
+                        <ListView fx:id="lvEspeciesDinosaurios" prefHeight="200.0" prefWidth="200.0" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+         <padding>
+            <Insets left="10.0" right="10.0" />
+         </padding>
+      </HBox>
+   </center>
+</BorderPane>
