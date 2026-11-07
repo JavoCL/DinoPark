@@ -16,12 +16,12 @@ public class GestorParque {
         listaEspecies = new ArrayList<>();
 
         // Datos de prueba iniciales opcionales
-        try {
-            EspecieDinosaurio tRex = new EspecieCarnivoro("A1","Tyrannosaurus Rex", "Cretácico", 1000f, 10);
-            listaEspecies.add(tRex);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            EspecieDinosaurio tRex = new EspecieCarnivoro("A1","Tyrannosaurus Rex", "Cretácico", 1000f, 10);
+//            listaEspecies.add(tRex);
+//        } catch (DatoInvalidoException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public static synchronized GestorParque getInstancia() {
