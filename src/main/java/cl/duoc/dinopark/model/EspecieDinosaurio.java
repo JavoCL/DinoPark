@@ -31,7 +31,7 @@ public abstract class EspecieDinosaurio {
             throw new DatoInvalidoException("El ID no puede estar vacío.");
         }
 
-        this.id = id;
+        this.id = nuevoId;
     }
 
     public void setNombreEspecie (String nuevoNombreEspecie) throws DatoInvalidoException{
@@ -39,7 +39,7 @@ public abstract class EspecieDinosaurio {
             throw new DatoInvalidoException("El nombre de la nueva especie de dinosaurio no puede estar vacío.");
         }
 
-        this.nombreEspecie = nombreEspecie;
+        this.nombreEspecie = nuevoNombreEspecie;
     }
 
     public void setPeriodo(String nuevoPeriodo) throws DatoInvalidoException {
@@ -47,7 +47,7 @@ public abstract class EspecieDinosaurio {
             throw new DatoInvalidoException("El período al que perteneció la especie de dinosaurio no puede ser vacío.");
         }
 
-        this.periodo = periodo;
+        this.periodo = nuevoPeriodo;
     }
 
     public void setPeso(float nuevoPeso) throws DatoInvalidoException {
