@@ -19,6 +19,9 @@ import java.util.List;
  */
 public class EspecieDaoJson implements EspecieDao {
 
+    // La ruta del archivo donde se guardarn/leeran los datos
+    // 'static' significa que no requiere un objeto de la clase 'EspecieDaoJson' para existir (Pertenece a la clase, no a un objeto)
+    // 'final' significa que su valor será constante y no puede modificarse en ejecución
     private static final String RUTA_ARCHIVO = "especies_dino.json";
     private final Gson gson;
 
@@ -30,6 +33,7 @@ public class EspecieDaoJson implements EspecieDao {
     /**
      * Clase auxiliar interna para organizar la persistencia separando
      * las especies según su tipo concreto de forma limpia.
+     * Esto ayudará que las especies se guarden por separado en el JSON resultante.
      */
     private static class ContenedorEspecies {
         List<EspecieCarnivoro> carnivoros = new ArrayList<>();
@@ -41,24 +45,32 @@ public class EspecieDaoJson implements EspecieDao {
         ContenedorEspecies contenedor = new ContenedorEspecies();
 
         // Clasificamos cada especie de la lista general en su respectiva sub-lista
+        // Recorremos la lista
         for (EspecieDinosaurio especie : listaEspecies) {
+            // Si la especie actual es carnivoro, lo añade a la coleccion de carnivoros
             if (especie instanceof EspecieCarnivoro) {
                 contenedor.carnivoros.add((EspecieCarnivoro) especie);
-            } else if (especie instanceof EspecieHerbivoro) {
+            }
+            // Si la especie actual es herbivoro, lo añade a la coleccion de carnivoros
+            else if (especie instanceof EspecieHerbivoro) {
                 contenedor.herbivoros.add((EspecieHerbivoro) especie);
             }
         }
 
         // Guardamos el objeto contenedor completo en el archivo JSON
         try (FileWriter writer = new FileWriter(RUTA_ARCHIVO)) {
+            // 'gson.toJson()' transforma el entrante 'contenedor' en un objeto Json estándar válido
             gson.toJson(contenedor, writer);
-        } catch (IOException e) {
+        }
+        // Si hay un error de escritura, se lanzara excepcion de lectura-escritura (IOException)
+        catch (IOException e) {
             throw new Exception("Error al guardar las especies en el archivo JSON: " + e.getMessage());
         }
     }
 
     @Override
     public List<EspecieDinosaurio> cargarEspecies() throws Exception {
+        // Se abre un nuevo objeto que cargara los datos desde el archivo
         File archivo = new File(RUTA_ARCHIVO);
 
         // Si el archivo no existe todavía, retornamos una lista vacía
@@ -66,12 +78,18 @@ public class EspecieDaoJson implements EspecieDao {
             return new ArrayList<>();
         }
 
+        // Intentamos leer el archivo
+        // Si lo logramos...
         try (FileReader reader = new FileReader(RUTA_ARCHIVO)) {
+            // ... transformamos lo que leemos dentro del archivo a la clase 'ContenedorEspecies'
+            // (que es el objeto guardado en el Json)
             ContenedorEspecies contenedor = gson.fromJson(reader, ContenedorEspecies.class);
+            // Lista unificada de especies leidas desde el archivo
             List<EspecieDinosaurio> listaUnificada = new ArrayList<>();
 
+            // Si lo pudo leer...
             if (contenedor != null) {
-                // Reconstruimos la lista general uniendo carnívoros y herbívoros
+                // ... reconstruimos la lista general uniendo carnívoros y herbívoros
                 if (contenedor.carnivoros != null) {
                     listaUnificada.addAll(contenedor.carnivoros);
                 }
@@ -80,8 +98,11 @@ public class EspecieDaoJson implements EspecieDao {
                 }
             }
 
+            // Retorna la lista leida
             return listaUnificada;
-        } catch (IOException e) {
+        }
+        // Si hay un error de lectura, se lanzara excepcion de lectura-escritura (IOException)
+        catch (IOException e) {
             throw new Exception("Error al leer las especies desde el archivo JSON: " + e.getMessage());
         }
     }

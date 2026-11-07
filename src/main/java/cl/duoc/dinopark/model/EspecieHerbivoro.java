@@ -23,7 +23,7 @@ public class EspecieHerbivoro extends EspecieDinosaurio {
         {
             throw new DatoInvalidoException("El tipo de planta preferida no puede ser vacío.");
         }
-        this.tipoPlantaPreferida = tipoPlantaPreferida;
+        this.tipoPlantaPreferida = nuevoTipoPlantaPreferida;
     }
     // endregion
 
