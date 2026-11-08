@@ -41,7 +41,7 @@ public class EspecieDaoJson implements EspecieDao {
     }
 
     @Override
-    public void guardarEspecies(List<EspecieDinosaurio> listaEspecies) throws Exception {
+    public void guardarEspecies(List<EspecieDinosaurio> listaEspecies) throws IOException {
         ContenedorEspecies contenedor = new ContenedorEspecies();
 
         // Clasificamos cada especie de la lista general en su respectiva sub-lista
@@ -64,12 +64,12 @@ public class EspecieDaoJson implements EspecieDao {
         }
         // Si hay un error de escritura, se lanzara excepcion de lectura-escritura (IOException)
         catch (IOException e) {
-            throw new Exception("Error al guardar las especies en el archivo JSON: " + e.getMessage());
+            throw new IOException("Error al guardar las especies en el archivo JSON: " + e.getMessage());
         }
     }
 
     @Override
-    public List<EspecieDinosaurio> cargarEspecies() throws Exception {
+    public List<EspecieDinosaurio> cargarEspecies() throws IOException {
         // Se abre un nuevo objeto que cargara los datos desde el archivo
         File archivo = new File(RUTA_ARCHIVO);
 
@@ -103,7 +103,7 @@ public class EspecieDaoJson implements EspecieDao {
         }
         // Si hay un error de lectura, se lanzara excepcion de lectura-escritura (IOException)
         catch (IOException e) {
-            throw new Exception("Error al leer las especies desde el archivo JSON: " + e.getMessage());
+            throw new IOException("Error al leer las especies desde el archivo JSON: " + e.getMessage());
         }
     }
 }
