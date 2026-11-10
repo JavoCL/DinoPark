@@ -38,3 +38,5 @@ build/
 ### Mac OS ###
 .DS_Store
 especies_dino.json
+/especies_carnivoros.json
+/especies_herbivoros.json

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane prefHeight="649.0" prefWidth="1176.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cl.duoc.dinopark.controller.VistaPrincipalController">
+
+    <top>
+        <VBox alignment="CENTER" spacing="6" style="-fx-background-color: #25a100; -fx-padding: 18;">
+            <Label style="-fx-text-fill: white; -fx-font-size: 30px; -fx-font-weight: bold;" text="DinoPark - Dex">
+            <font>
+               <Font size="35.0" />
+            </font></Label>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="10" style="-fx-padding: 15;">
+            <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Lista de especies" />
+
+            <TableView fx:id="tblEspecies" prefHeight="402.0" prefWidth="645.0" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colTipo" prefWidth="95" text="Tipo" />
+                    <TableColumn fx:id="colCodigo" prefWidth="85" text="Código" />
+                    <TableColumn fx:id="colNombreEspecie" prefWidth="120" text="Nombre especie" />
+                    <TableColumn fx:id="colPeriodo" prefWidth="100" text="Periodo" />
+                    <TableColumn fx:id="colPeso" prefWidth="85.79998779296875" text="Peso" />
+               <TableColumn fx:id="colCaracteristicas" prefWidth="237.4000244140625" text="Características" />
+                </columns>
+            </TableView>
+
+            <Separator />
+        </VBox>
+    </center>
+    <right>
+        <VBox prefHeight="582.0" prefWidth="419.0" spacing="30.0" style="-fx-padding: 25;" BorderPane.alignment="CENTER">
+            <children>
+
+                <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Registar nueva bicicleta" />
+
+                <GridPane hgap="10" prefHeight="216.0" prefWidth="370.0" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="115" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <Label text="Tipo" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <ComboBox fx:id="cbTipo" maxWidth="Infinity" onAction="#cambiarCategoria" promptText="Seleccione" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <TextField fx:id="txtCodigo" promptText="Ej: IC001" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <TextField fx:id="txtNombreEspecie" promptText="Ej: Velociraptor" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+               <ComboBox fx:id="cbPeriodo" prefHeight="26.0" prefWidth="245.0" promptText="Seleccione" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                    <TextField fx:id="txtPeso" promptText="Ej: 500" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                    <ComboBox fx:id="cbPeligrosidad" maxWidth="Infinity" promptText="Seleccione" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                  <opaqueInsets>
+                     <Insets />
+                  </opaqueInsets>
+                  <GridPane.margin>
+                     <Insets />
+                  </GridPane.margin></ComboBox>
+               <TextField fx:id="txtPlantaPreferida" promptText="Ej: Helechos" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                  <opaqueInsets>
+                     <Insets />
+                  </opaqueInsets>
+                  <GridPane.margin>
+                     <Insets />
+                  </GridPane.margin>
+               </TextField>
+
+                    <Label fx:id="lbPeligrosidad" text="Nivel Peligrosidad" visible="false" GridPane.rowIndex="5">
+                  <opaqueInsets>
+                     <Insets />
+                  </opaqueInsets>
+                  <GridPane.margin>
+                     <Insets />
+                  </GridPane.margin></Label>
+
+                    <Label text="Código:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <Label fx:id="lbPlantaPreferida" text="Planta preferida:" visible="false" GridPane.rowIndex="5">
+                  <opaqueInsets>
+                     <Insets />
+                  </opaqueInsets>
+                  <GridPane.margin>
+                     <Insets />
+                  </GridPane.margin></Label>
+
+                    <Label text="Nombre especie:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+
+                    <Label text="Periodo:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+
+                    <Label text="Peso (kg):" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                    </rowConstraints>
+                </GridPane>
+
+                <HBox spacing="10">
+                    <Button fx:id="btnAgregarEspecie" onAction="#AgregarEspecie" style="-fx-background-color: #00a19e; -fx-text-fill: white;" text="++ Agregar especie" />
+                </HBox>
+                <VBox prefHeight="200.0" prefWidth="100.0">
+                    <children>
+                        <Label alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="18.0" prefWidth="370.0" style="-fx-text-fill: #34495e;" text="----------- REGISTROS -----------" wrapText="true" />
+
+                        <Label fx:id="lblMensaje" style="-fx-text-fill: #34495e;" text="[mensaje_sistema]" wrapText="true" />
+                    </children>
+                </VBox>
+            </children>
+            <opaqueInsets>
+                <Insets />
+            </opaqueInsets>
+        </VBox>
+    </right>
+</BorderPane>

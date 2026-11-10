@@ -1,282 +1,254 @@
 package cl.duoc.dinopark.controller;
 
-// region IMPORTACIONES
-// Importaciones de clases del modelo, DAO, colecciones y componentes de JavaFX
 import cl.duoc.dinopark.GestorParque;
 import cl.duoc.dinopark.dao.EspecieDao;
 import cl.duoc.dinopark.dao.EspecieDaoJson;
-import cl.duoc.dinopark.model.DatoInvalidoException;
-import cl.duoc.dinopark.model.EspecieCarnivoro;
-import cl.duoc.dinopark.model.EspecieHerbivoro;
-import cl.duoc.dinopark.model.EspecieDinosaurio;
-
+import cl.duoc.dinopark.model.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
-// endregion
 
 /**
- * Controlador de la vista principal "Dino DEX".
- * Administra los formularios de registro de especies, la visualización en ListView
- * y la persistencia de datos mediante el patrón DAO y formato JSON.
- * Debe esta referenciado en la vista 'vista-principal.fxml'
+ * Controlador principal para la nueva vista unificada de DinoPark-Dex.
+ * Gestiona la TableView central y el formulario dinámico lateral para registrar
+ * tanto carnívoros como herbívoros en una sola pantalla.
  */
-public class VistaPrincipalController implements Initializable {
+public class VistaPrincipalController {
 
     // ==========================================
-    // BLOQUE 1: COMPONENTES FXML - FORMULARIO CARNÍVORO
+    // BLOQUE 1: COMPONENTES FXML - TABLA Y COLUMNAS
     // ==========================================
-    @FXML private TextField txtEspCarnId;
-    @FXML private TextField txtEspCarnNombre;
-    @FXML private ComboBox<String> cbEspCarnPeriodo;
-    @FXML private TextField txtEspCarnPeso;
-    @FXML private ComboBox<Integer> cbEspCarnPeligrosidad;
+    @FXML private TableView<EspecieDinosaurio> tblEspecies;
+    @FXML private TableColumn<EspecieDinosaurio, String> colTipo;
+    @FXML private TableColumn<EspecieDinosaurio, String> colCodigo;
+    @FXML private TableColumn<EspecieDinosaurio, String> colNombreEspecie;
+    @FXML private TableColumn<EspecieDinosaurio, String> colPeriodo;
+    @FXML private TableColumn<EspecieDinosaurio, Double> colPeso;
+    @FXML private TableColumn<EspecieDinosaurio, String> colCaracteristicas;
 
     // ==========================================
-    // BLOQUE 2: COMPONENTES FXML - FORMULARIO HERBÍVORO
+    // BLOQUE 2: COMPONENTES FXML - FORMULARIO DINÁMICO
     // ==========================================
-    @FXML private TextField txtEspHerbId;
-    @FXML private TextField txtEspHerbNombre;
-    @FXML private ComboBox<String> cbEspHerbPeriodo;
-    @FXML private TextField txtEspHerbPeso;
-    @FXML private TextField txtEspHerbTipoPlanta;
+    @FXML private ComboBox<String> cbTipo;
+    @FXML private TextField txtCodigo;
+    @FXML private TextField txtNombreEspecie;
+    @FXML private ComboBox<String> cbPeriodo;
+    @FXML private TextField txtPeso;
+    @FXML private ComboBox<Integer> cbPeligrosidad;
+    @FXML private TextField txtPlantaPreferida;
+
+    @FXML private Label lbPeligrosidad;
+    @FXML private Label lbPlantaPreferida;
+    @FXML private Button btnAgregarEspecie;
+    @FXML private Label lblMensaje;
 
     // ==========================================
-    // BLOQUE 3: COMPONENTES FXML - LISTA Y BOTONES
+    // BLOQUE 3: ATRIBUTOS DE LÓGICA Y GESTIÓN
     // ==========================================
-    @FXML private ListView<EspecieDinosaurio> lvEspeciesDinosaurios;
-    @FXML private Button btnAgregarEspCarn;
-    @FXML private Button btnAgregarEspHerb;
-    @FXML private Button btnGuardarJSON;
-
-    // ==========================================
-    // BLOQUE 4: ATRIBUTOS DE LÓGICA Y PERSISTENCIA
-    // ==========================================
+    private ObservableList<EspecieDinosaurio> listaObservable;
     private GestorParque gestor;
     private EspecieDao especieDao;
 
-    // Declaramos un atributo como lista observable las especies de dinosaurios agregadas.
-    // Esto estará "atento" a cualquier cambio que ocurra en la lista de las especies
-    // en el gestor.
-    private ObservableList<EspecieDinosaurio> observableEspecies;
-
     /**
-     * Metodo inicializador de la vista JavaFX.
-     * Se ejecuta automáticamente al cargar el archivo FXML.
+     * Método inicializador que se ejecuta automáticamente al cargar el FXML.
      */
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    @FXML
+    public void initialize() {
         // ==========================================
-        // BLOQUE 5: INICIALIZACIÓN DE INSTANCIAS Y CARGA DESDE ARCHIVO JSON
+        // BLOQUE 4: CONFIGURACIÓN INICIAL DE LA TABLA Y DATOS
         // ==========================================
-
-        // Obtenemos el gestor del parque actual con getInstancia.
-        // Si no esta creado, lo creará internamente (revisar metodo getInstancia())
         gestor = GestorParque.getInstancia();
-        // Crea un objeto de la clase DAO que gestionará los registros con el archivo
         especieDao = new EspecieDaoJson();
 
-        // Intentar leer las especies previamente guardadas en el archivo JSON mediante el DAO
+        // Configurar el mapeo de las columnas estándar de la TableView
+        colTipo.setCellValueFactory(cellData -> {
+            EspecieDinosaurio especie = cellData.getValue();
+            String tipoStr = (especie instanceof EspecieCarnivoro) ? "Carnívoro" : "Herbívoro";
+            return new javafx.beans.property.SimpleStringProperty(tipoStr);
+        });
+        colCodigo.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colNombreEspecie.setCellValueFactory(new PropertyValueFactory<>("nombreEspecie"));
+        colPeriodo.setCellValueFactory(new PropertyValueFactory<>("periodo"));
+        colPeso.setCellValueFactory(new PropertyValueFactory<>("peso"));
+
+        // Columna dinámica para reflejar la característica propia según la subclase polimórfica
+        colCaracteristicas.setCellValueFactory(cellData -> {
+            EspecieDinosaurio especie = cellData.getValue();
+            String caracteristica = "";
+            if (especie instanceof EspecieCarnivoro) {
+                caracteristica = "Peligrosidad: " + ((EspecieCarnivoro) especie).getNivelPeligrosidad();
+            } else if (especie instanceof EspecieHerbivoro) {
+                caracteristica = "Planta: " + ((EspecieHerbivoro) especie).getTipoPlantaPreferida();
+            }
+            return new javafx.beans.property.SimpleStringProperty(caracteristica);
+        });
+
+        // Poblar los ComboBox principales con opciones predefinidas
+        cbTipo.setItems(FXCollections.observableArrayList("Carnívoro", "Herbívoro"));
+        cbPeriodo.setItems(FXCollections.observableArrayList("Triásico", "Jurásico", "Cretácico"));
+        cbPeligrosidad.setItems(FXCollections.observableArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+
+        // Cargamos los datos en el gestor
         try {
+            // 1. Cargamos las especies desde el archivo JSON al iniciar
             List<EspecieDinosaurio> especiesGuardadas = especieDao.cargarEspecies();
+
+            // 2. Si existen registros, los incorporamos al gestor en memoria
             if (especiesGuardadas != null && !especiesGuardadas.isEmpty()) {
-                // Evita duplicados en memoria limpiando e insertando la lista leída desde el JSON
-                gestor.getListaEspecies().clear();
-                gestor.getListaEspecies().addAll(especiesGuardadas);
+                for (EspecieDinosaurio especie : especiesGuardadas) {
+                    gestor.agregarEspecie(especie);
+                }
             }
         } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Lectura",
-                    "No se pudieron cargar los datos previos del archivo JSON: " + e.getMessage());
+            System.err.println("No se pudieron cargar los datos previos: " + e.getMessage());
         }
 
-        // ==========================================
-        // BLOQUE 6: POBLAR COMBOBOX CON OPCIONES DE FORMULARIO
-        // ==========================================
-        // Períodos geológicos para carnívoros y herbívoros
-        cbEspCarnPeriodo.getItems().setAll("Triásico", "Jurásico", "Cretácico");
-        cbEspHerbPeriodo.getItems().setAll("Triásico", "Jurásico", "Cretácico");
+        // Cargar los datos actuales almacenados en el Gestor hacia la lista observable de la tabla
+        listaObservable = FXCollections.observableArrayList(gestor.getListaEspecies());
+        tblEspecies.setItems(listaObservable);
 
-        // Nivel de peligrosidad (del 1 al 10) para el selector de carnívoros
-        cbEspCarnPeligrosidad.getItems().setAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-
-        // Actualizar la interfaz visual con la lista de especies (incluidas las leídas del JSON)
-        actualizarListaEspecies();
+        lblMensaje.setText("Sistema listo. Ingrese los datos de la especie.");
     }
 
     /**
-     * Sincroniza la lista en memoria del GestorParque con el componente ListView de la vista.
-     */
-    private void actualizarListaEspecies() {
-        // ==========================================
-        // BLOQUE 7: REFRESCAR ELEMENTOS EN EL LISTVIEW
-        // ==========================================
-
-        // Añadimos los elementos de la lista en el gestor a la lista observable.
-        // Si un elemento cambia en la lista del gestor, la lista observable se actualiza inmediatamente
-        observableEspecies = FXCollections.observableArrayList(gestor.getListaEspecies());
-        // Utilzamos un ListView para mostrar los elementos de la lista a mostrar
-        lvEspeciesDinosaurios.setItems(observableEspecies);
-    }
-
-    /**
-     * Maneja el registro de especies carnívoras con validaciones.
+     * Alterna la visibilidad de los campos específicos del formulario según el tipo seleccionado.
      */
     @FXML
-    private void AgregarEspecieCarnivoro() {
+    public void cambiarCategoria(ActionEvent event) {
         // ==========================================
-        // BLOQUE 8: EVENTO AGREGAR ESPECIE CARNÍVORA
+        // BLOQUE 5: CAMBIO DINÁMICO DE CAMPOS (INTERFAZ)
+        // ==========================================
+        String seleccion = cbTipo.getValue();
+        if ("Carnívoro".equals(seleccion)) {
+            // Mostrar campos exclusivos de carnívoros
+            cbPeligrosidad.setManaged(true);
+            cbPeligrosidad.setVisible(true);
+            lbPeligrosidad.setManaged(true);
+            lbPeligrosidad.setVisible(true);
+
+            // Ocultar campos de herbívoros
+            txtPlantaPreferida.setManaged(false);
+            txtPlantaPreferida.setVisible(false);
+            lbPlantaPreferida.setManaged(false);
+            lbPlantaPreferida.setVisible(false);
+        } else if ("Herbívoro".equals(seleccion)) {
+            // Ocultar campos de carnívoros
+            cbPeligrosidad.setManaged(false);
+            cbPeligrosidad.setVisible(false);
+            lbPeligrosidad.setManaged(false);
+            lbPeligrosidad.setVisible(false);
+
+            // Mostrar campos exclusivos de herbívoros
+            txtPlantaPreferida.setManaged(true);
+            txtPlantaPreferida.setVisible(true);
+            lbPlantaPreferida.setManaged(true);
+            lbPlantaPreferida.setVisible(true);
+        }
+    }
+
+    /**
+     * Valida, instancia y registra una nueva especie (carnívora o herbívora) en el sistema.
+     */
+    @FXML
+    public void AgregarEspecie(ActionEvent event) {
+        // ==========================================
+        // BLOQUE 6: VALIDACIÓN Y REGISTRO DE ESPECIE
         // ==========================================
         try {
-            // Obtenemos los valores del text field de id y nombre
-            // ( ❕ IMPORTANTE: Aprender esta forma de obtener valores de text fields)
-            String id = txtEspCarnId.getText();
-            String nombre = txtEspCarnNombre.getText();
-            // Obtenemos el valor seleccionado en el combo box de período
-            // ( ❕ IMPORTANTE: Aprender esta forma de obtener valores de combo box)
-            String periodo = cbEspCarnPeriodo.getValue();
+            // 1. Validar selección de tipo general
+            String tipo = cbTipo.getValue();
+            if (tipo == null || tipo.isEmpty()) {
+                throw new DatoInvalidoException("Debe seleccionar un tipo de especie (Carnívoro o Herbívoro).");
+            }
 
-            if (txtEspCarnPeso.getText().isEmpty()) {
+            // 2. Capturar y validar campos comunes obligatorios
+            String codigo = txtCodigo.getText();
+            String nombreEspecie = txtNombreEspecie.getText();
+            String periodo = cbPeriodo.getValue();
+
+            if (codigo == null || codigo.trim().isEmpty() ||
+                    nombreEspecie == null || nombreEspecie.trim().isEmpty() ||
+                    periodo == null) {
+                throw new DatoInvalidoException("Todos los campos de texto y el periodo son obligatorios.");
+            }
+
+            // 3. Validar y parsear el peso numérico de manera segura
+            String pesoStr = txtPeso.getText();
+            if (pesoStr == null || pesoStr.trim().isEmpty()) {
                 throw new DatoInvalidoException("El campo peso no puede estar vacío.");
             }
-            // Transformamos el valor string que viene del campo texto de peso a float
-            // ( ❕ IMPORTANTE: Aprender el formato de estas transformaciones)
-            float peso = Float.parseFloat(txtEspCarnPeso.getText());
 
-            // Obtenemos el valor seleccionado en el combo box de Nivel de peligrosidad
-            // ( ❕ IMPORTANTE: Aprender esta forma de obtener valores de combo box)
-            Integer peligrosidad = cbEspCarnPeligrosidad.getValue();
-            if (peligrosidad == null) {
-                throw new DatoInvalidoException("Debe seleccionar un nivel de peligrosidad.");
+            float peso;
+            try {
+                peso = Float.parseFloat(pesoStr);
+                if (peso <= 0) {
+                    throw new DatoInvalidoException("El peso debe ser un valor numérico mayor a 0.");
+                }
+            } catch (NumberFormatException e) {
+                throw new DatoInvalidoException("El peso ingresado tiene un formato inválido (debe ser un número).");
             }
 
-            // Instancia de EspecieCarnivoro
-            EspecieCarnivoro carnivoro = new EspecieCarnivoro(id, nombre, periodo, peso, peligrosidad);
+            // 4. Polimorfismo: Instanciar la subclase adecuada según la categoría elegida
+            EspecieDinosaurio nuevaEspecie = null;
 
-            // Registro en el Gestor en memoria
-            gestor.agregarEspecie(carnivoro);
+            if ("Carnívoro".equals(tipo)) {
+                Integer peligrosidad = cbPeligrosidad.getValue();
+                if (peligrosidad == null) {
+                    throw new DatoInvalidoException("Debe seleccionar un nivel de peligrosidad para el carnívoro.");
+                }
+                nuevaEspecie = new EspecieCarnivoro(codigo, nombreEspecie, periodo, peso, peligrosidad);
 
-            // Actualización de UI
-            actualizarListaEspecies();
-            limpiarFormularioCarnivoro();
+            } else if ("Herbívoro".equals(tipo)) {
+                String plantaPreferida = txtPlantaPreferida.getText();
+                if (plantaPreferida == null || plantaPreferida.trim().isEmpty()) {
+                    throw new DatoInvalidoException("Debe ingresar la planta preferida para el herbívoro.");
+                }
+                nuevaEspecie = new EspecieHerbivoro(codigo, nombreEspecie, periodo, peso, plantaPreferida);
+            }
 
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Especie carnívora agregada a la lista.");
+            // 5. Registrar en memoria mediante el Gestor y actualizar la TableView
+            gestor.agregarEspecie(nuevaEspecie);
+            listaObservable.setAll(gestor.getListaEspecies());
 
-        }
-        // En caso que ocurran excepciones, se enviaran alertas.
-        // ( ❕ IMPORTANTE: Aprender el formato de alertas)
-        catch (NumberFormatException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Formato", "El peso ingresado debe ser un número válido.");
+            // Invocación automática del DAO para persistir de inmediato
+            try {
+                especieDao.guardarEspecies(gestor.getListaEspecies());
+            } catch (Exception e) {
+                lblMensaje.setText("Aviso: No se pudo respaldar en el archivo JSON: " + e.getMessage());
+            }
+
+            // 6. Limpiar formulario y reportar éxito al usuario
+            limpiarFormulario();
+            lblMensaje.setText("¡Especie registrada correctamente en el sistema!");
+
         } catch (DatoInvalidoException e) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Validación", e.getMessage());
+            // Manejo de reglas de negocio personalizadas
+            lblMensaje.setText("Validación: " + e.getMessage());
         } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error Inesperado", "Ocurrió un error al registrar la especie: " + e.getMessage());
+            // Manejo de errores genéricos imprevistos
+            lblMensaje.setText("Error inesperado: " + e.getMessage());
         }
     }
 
     /**
-     * Maneja el registro de especies herbívoras con validaciones.
+     * Limpia todos los campos del formulario y restablece el mensaje del sistema.
      */
-    @FXML
-    private void AgregarEspecieHerbivoro() {
+    private void limpiarFormulario() {
         // ==========================================
-        // BLOQUE 9: EVENTO AGREGAR ESPECIE HERBÍVORA
+        // BLOQUE 7: MÉTODO AUXILIAR DE LIMPIEZA
         // ==========================================
-        try {
-            // Obtenemos los valores del text field de id y nombre
-            // ( ❕ IMPORTANTE: Aprender esta forma de obtener valores de text fields)
-            String id = txtEspHerbId.getText();
-            String nombre = txtEspHerbNombre.getText();
-            // Obtenemos el valor seleccionado en el combo box de período
-            // ( ❕ IMPORTANTE: Aprender esta forma de obtener valores de combo box)
-            String periodo = cbEspHerbPeriodo.getValue();
-
-            if (txtEspHerbPeso.getText().isEmpty()) {
-                throw new DatoInvalidoException("El campo peso no puede estar vacío.");
-            }
-            // Transformamos el valor string que viene del campo texto de peso a float
-            // ( ❕ IMPORTANTE: Aprender el formato de estas transformaciones)
-            float peso = Float.parseFloat(txtEspHerbPeso.getText());
-            String tipoPlanta = txtEspHerbTipoPlanta.getText();
-
-            // Instancia de EspecieHerbivoro
-            EspecieHerbivoro herbivoro = new EspecieHerbivoro(id, nombre, periodo, peso, tipoPlanta);
-
-            // Registro en el Gestor en memoria
-            gestor.agregarEspecie(herbivoro);
-
-            // Actualización de UI
-            actualizarListaEspecies();
-            limpiarFormularioHerbivoro();
-
-            // Mensaje final de exito
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Especie herbívora agregada a la lista.");
-
-        }
-        // En caso que ocurran excepciones, se enviaran alertas.
-        // ( ❕ IMPORTANTE: Aprender el formato de alertas)
-        catch (NumberFormatException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Formato", "El peso ingresado debe ser un número válido.");
-        } catch (DatoInvalidoException e) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Validación", e.getMessage());
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error Inesperado", "Ocurrió un error al registrar la especie: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Guarda la lista completa de especies en el archivo JSON mediante el DAO.
-     */
-    @FXML
-    private void GuardarJSON() {
-        // ==========================================
-        // BLOQUE 10: GUARDAR REGISTROS EN ARCHIVO JSON (PATRÓN DAO)
-        // ==========================================
-        try {
-            // Invoca la capa DAO para sobreescribir/actualizar especies_dino.json con la lista actual
-            especieDao.guardarEspecies(gestor.getListaEspecies());
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Persistencia Exitosa",
-                    "Los registros de especies se han guardado correctamente en el archivo JSON.");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Persistencia",
-                    "No se pudo guardar el archivo JSON: " + e.getMessage());
-        }
-    }
-
-    // ==========================================
-    // BLOQUE 11: MÉTODOS AUXILIARES Y ALERTAS
-    // ==========================================
-
-    // Limpia el formulario carnivoro (opcional)
-    private void limpiarFormularioCarnivoro() {
-        txtEspCarnId.clear();
-        txtEspCarnNombre.clear();
-        cbEspCarnPeriodo.setValue(null);
-        txtEspCarnPeso.clear();
-        cbEspCarnPeligrosidad.setValue(null);
-    }
-
-    // Limpia el formulario herbivoro (opcional)
-    private void limpiarFormularioHerbivoro() {
-        txtEspHerbId.clear();
-        txtEspHerbNombre.clear();
-        cbEspHerbPeriodo.setValue(null);
-        txtEspHerbPeso.clear();
-        txtEspHerbTipoPlanta.clear();
-    }
-
-    // Metodo que envia una alerta como popUp
-    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
-        Alert alerta = new Alert(tipo);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        cbTipo.setValue(null);
+        txtCodigo.clear();
+        txtNombreEspecie.clear();
+        cbPeriodo.setValue(null);
+        txtPeso.clear();
+        cbPeligrosidad.setValue(null);
+        txtPlantaPreferida.clear();
+        lblMensaje.setText("[mensaje_sistema]");
     }
 }

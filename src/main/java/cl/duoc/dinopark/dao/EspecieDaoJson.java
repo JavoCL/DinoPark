@@ -5,11 +5,13 @@ import cl.duoc.dinopark.model.EspecieCarnivoro;
 import cl.duoc.dinopark.model.EspecieHerbivoro;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +24,8 @@ public class EspecieDaoJson implements EspecieDao {
     // La ruta del archivo donde se guardarn/leeran los datos
     // 'static' significa que no requiere un objeto de la clase 'EspecieDaoJson' para existir (Pertenece a la clase, no a un objeto)
     // 'final' significa que su valor será constante y no puede modificarse en ejecución
-    private static final String RUTA_ARCHIVO = "especies_dino.json";
+    private static final String RUTA_ARCHIVO_C = "especies_carnivoros.json";
+    private static final String RUTA_ARCHIVO_H = "especies_herbivoros.json";
     private final Gson gson;
 
     public EspecieDaoJson() {
@@ -30,80 +33,82 @@ public class EspecieDaoJson implements EspecieDao {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
-    /**
-     * Clase auxiliar interna para organizar la persistencia separando
-     * las especies según su tipo concreto de forma limpia.
-     * Esto ayudará que las especies se guarden por separado en el JSON resultante.
-     */
-    private static class ContenedorEspecies {
-        List<EspecieCarnivoro> carnivoros = new ArrayList<>();
-        List<EspecieHerbivoro> herbivoros = new ArrayList<>();
-    }
-
     @Override
     public void guardarEspecies(List<EspecieDinosaurio> listaEspecies) throws IOException {
-        ContenedorEspecies contenedor = new ContenedorEspecies();
+        //ContenedorEspecies contenedor = new ContenedorEspecies();
 
         // Clasificamos cada especie de la lista general en su respectiva sub-lista
+        List<EspecieCarnivoro> carnivoros = new ArrayList<>();
+        List<EspecieHerbivoro> herbivoros = new ArrayList<>();
         // Recorremos la lista
         for (EspecieDinosaurio especie : listaEspecies) {
             // Si la especie actual es carnivoro, lo añade a la coleccion de carnivoros
             if (especie instanceof EspecieCarnivoro) {
-                contenedor.carnivoros.add((EspecieCarnivoro) especie);
+                carnivoros.add((EspecieCarnivoro) especie);
             }
             // Si la especie actual es herbivoro, lo añade a la coleccion de carnivoros
             else if (especie instanceof EspecieHerbivoro) {
-                contenedor.herbivoros.add((EspecieHerbivoro) especie);
+                herbivoros.add((EspecieHerbivoro) especie);
             }
         }
 
-        // Guardamos el objeto contenedor completo en el archivo JSON
-        try (FileWriter writer = new FileWriter(RUTA_ARCHIVO)) {
+        // Guardamos la colección de especies carnivoras
+        try (FileWriter writer = new FileWriter(RUTA_ARCHIVO_C)) {
             // 'gson.toJson()' transforma el entrante 'contenedor' en un objeto Json estándar válido
-            gson.toJson(contenedor, writer);
+            gson.toJson(carnivoros, writer);
         }
         // Si hay un error de escritura, se lanzara excepcion de lectura-escritura (IOException)
         catch (IOException e) {
-            throw new IOException("Error al guardar las especies en el archivo JSON: " + e.getMessage());
+            throw new IOException("Error al guardar las especies carnívoras en el archivo JSON: " + e.getMessage());
+        }
+
+        // Guardamos la colección de especies carnivoras
+        try (FileWriter writer = new FileWriter(RUTA_ARCHIVO_H)) {
+            // 'gson.toJson()' transforma el entrante 'contenedor' en un objeto Json estándar válido
+            gson.toJson(herbivoros, writer);
+        }
+        // Si hay un error de escritura, se lanzara excepcion de lectura-escritura (IOException)
+        catch (IOException e) {
+            throw new IOException("Error al guardar las especies herbívoras en el archivo JSON: " + e.getMessage());
         }
     }
 
     @Override
-    public List<EspecieDinosaurio> cargarEspecies() throws IOException {
-        // Se abre un nuevo objeto que cargara los datos desde el archivo
-        File archivo = new File(RUTA_ARCHIVO);
+    public List<EspecieDinosaurio> cargarEspecies() throws Exception {
+        // Lista general unificada que vamos a retornar
+        List<EspecieDinosaurio> listaUnificada = new ArrayList<>();
 
-        // Si el archivo no existe todavía, retornamos una lista vacía
-        if (!archivo.exists()) {
-            return new ArrayList<>();
-        }
+        // 1. CARGAR CARNÍVOROS DESDE SU ARCHIVO
+        File archivoCarnivoros = new File(RUTA_ARCHIVO_C);
+        if (archivoCarnivoros.exists()) {
+            try (FileReader reader = new FileReader(archivoCarnivoros)) {
+                Type tipoListaCarnivoros = new TypeToken<List<EspecieCarnivoro>>(){}.getType();
+                List<EspecieCarnivoro> listaCarnivoros = gson.fromJson(reader, tipoListaCarnivoros);
 
-        // Intentamos leer el archivo
-        // Si lo logramos...
-        try (FileReader reader = new FileReader(RUTA_ARCHIVO)) {
-            // ... transformamos lo que leemos dentro del archivo a la clase 'ContenedorEspecies'
-            // (que es el objeto guardado en el Json)
-            ContenedorEspecies contenedor = gson.fromJson(reader, ContenedorEspecies.class);
-            // Lista unificada de especies leidas desde el archivo
-            List<EspecieDinosaurio> listaUnificada = new ArrayList<>();
-
-            // Si lo pudo leer...
-            if (contenedor != null) {
-                // ... reconstruimos la lista general uniendo carnívoros y herbívoros
-                if (contenedor.carnivoros != null) {
-                    listaUnificada.addAll(contenedor.carnivoros);
+                if (listaCarnivoros != null) {
+                    listaUnificada.addAll(listaCarnivoros); // Las añadimos a la lista unificada
                 }
-                if (contenedor.herbivoros != null) {
-                    listaUnificada.addAll(contenedor.herbivoros);
-                }
+            } catch (IOException e) {
+                throw new Exception("Error al leer el archivo de carnívoros: " + e.getMessage());
             }
+        }
 
-            // Retorna la lista leida
-            return listaUnificada;
+        // 2. CARGAR HERBÍVOROS DESDE SU ARCHIVO
+        File archivoHerbivoros = new File(RUTA_ARCHIVO_H);
+        if (archivoHerbivoros.exists()) {
+            try (FileReader reader = new FileReader(archivoHerbivoros)) {
+                Type tipoListaHerbivoros = new TypeToken<List<EspecieHerbivoro>>(){}.getType();
+                List<EspecieHerbivoro> listaHerbivoros = gson.fromJson(reader, tipoListaHerbivoros);
+
+                if (listaHerbivoros != null) {
+                    listaUnificada.addAll(listaHerbivoros); // Las añadimos a la lista unificada
+                }
+            } catch (IOException e) {
+                throw new Exception("Error al leer el archivo de herbívoros: " + e.getMessage());
+            }
         }
-        // Si hay un error de lectura, se lanzara excepcion de lectura-escritura (IOException)
-        catch (IOException e) {
-            throw new IOException("Error al leer las especies desde el archivo JSON: " + e.getMessage());
-        }
+
+        // 3. Retornamos la lista combinada con todos los dinosaurios
+        return listaUnificada;
     }
 }
