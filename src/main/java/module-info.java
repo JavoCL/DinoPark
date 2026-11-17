@@ -2,6 +2,8 @@ module cl.duoc.dinopark {
     requires javafx.controls;
     requires javafx.fxml;
     requires com.google.gson;
+    // Añade java
+    requires java.sql;
 
     // Permite que JavaFX FXML acceda a todos tus controladores
     opens cl.duoc.dinopark.controller to javafx.fxml;

@@ -19,7 +19,7 @@ public abstract class EspecieDinosaurio {
 
     // region GETTERS
     public String getId() { return id; }
-    public double getPeso() { return peso; }
+    public float getPeso() { return peso; }
     public String getNombreEspecie() {return nombreEspecie;}
     public String getPeriodo() {return periodo;}
     // endregion
