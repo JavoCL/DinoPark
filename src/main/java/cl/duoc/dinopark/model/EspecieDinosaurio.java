@@ -9,6 +9,11 @@ public abstract class EspecieDinosaurio {
     // endregion
 
     // region CONSTRUCTORES
+    public EspecieDinosaurio(String nuevaEspecie, String nuevoPeriodo, float nuevoPeso) throws DatoInvalidoException {
+        this.setNombreEspecie(nuevaEspecie);
+        this.setPeriodo(nuevoPeriodo);
+        this.setPeso(nuevoPeso);
+    }
     public EspecieDinosaurio(String nuevoId, String nuevaEspecie, String nuevoPeriodo, float nuevoPeso) throws DatoInvalidoException {
         this.setId(nuevoId);
         this.setNombreEspecie(nuevaEspecie);

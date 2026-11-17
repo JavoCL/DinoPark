@@ -7,6 +7,11 @@ public class EspecieCarnivoro extends EspecieDinosaurio {
     // endregion
 
     // region CONSTRUCTORES
+    public EspecieCarnivoro(String nuevaEspecie, String nuevoPeriodo, float nuevoPeso, int nuevoNivelPeligrosidad) throws DatoInvalidoException {
+        super(nuevaEspecie, nuevoPeriodo,nuevoPeso);
+        this.setNivelPeligrosidad(nuevoNivelPeligrosidad);
+    }
+
     public EspecieCarnivoro(String nuevoId, String nuevaEspecie, String nuevoPeriodo, float nuevoPeso, int nuevoNivelPeligrosidad) throws DatoInvalidoException {
         super(nuevoId, nuevaEspecie, nuevoPeriodo,nuevoPeso);
         this.setNivelPeligrosidad(nuevoNivelPeligrosidad);

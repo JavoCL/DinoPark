@@ -3,6 +3,7 @@ package cl.duoc.dinopark.controller;
 import cl.duoc.dinopark.GestorParque;
 import cl.duoc.dinopark.dao.EspecieDao;
 import cl.duoc.dinopark.dao.EspecieDaoJson;
+import cl.duoc.dinopark.dao.EspecieDaoMysql;
 import cl.duoc.dinopark.model.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -64,7 +65,8 @@ public class VistaPrincipalController {
         // BLOQUE 4: CONFIGURACIÓN INICIAL DE LA TABLA Y DATOS
         // ==========================================
         gestor = GestorParque.getInstancia();
-        especieDao = new EspecieDaoJson();
+        //especieDao = new EspecieDaoJson();
+        especieDao = new EspecieDaoMysql();
 
         // Configurar el mapeo de las columnas estándar de la TableView
         colTipo.setCellValueFactory(cellData -> {
@@ -168,13 +170,17 @@ public class VistaPrincipalController {
             }
 
             // 2. Capturar y validar campos comunes obligatorios
-            String codigo = txtCodigo.getText();
+            //String codigo = txtCodigo.getText();
             String nombreEspecie = txtNombreEspecie.getText();
             String periodo = cbPeriodo.getValue();
 
-            if (codigo == null || codigo.trim().isEmpty() ||
-                    nombreEspecie == null || nombreEspecie.trim().isEmpty() ||
-                    periodo == null) {
+//            if (codigo == null || codigo.trim().isEmpty() ||
+//                    nombreEspecie == null || nombreEspecie.trim().isEmpty() ||
+//                    periodo == null) {
+//                throw new DatoInvalidoException("Todos los campos de texto y el periodo son obligatorios.");
+//            }
+
+            if (nombreEspecie == null || nombreEspecie.trim().isEmpty() || periodo == null) {
                 throw new DatoInvalidoException("Todos los campos de texto y el periodo son obligatorios.");
             }
 
@@ -202,30 +208,39 @@ public class VistaPrincipalController {
                 if (peligrosidad == null) {
                     throw new DatoInvalidoException("Debe seleccionar un nivel de peligrosidad para el carnívoro.");
                 }
-                nuevaEspecie = new EspecieCarnivoro(codigo, nombreEspecie, periodo, peso, peligrosidad);
+                // Constructor sin ID (la BD se encarga del ID)
+                nuevaEspecie = new EspecieCarnivoro(nombreEspecie, periodo, peso, peligrosidad);
 
             } else if ("Herbívoro".equals(tipo)) {
                 String plantaPreferida = txtPlantaPreferida.getText();
                 if (plantaPreferida == null || plantaPreferida.trim().isEmpty()) {
                     throw new DatoInvalidoException("Debe ingresar la planta preferida para el herbívoro.");
                 }
-                nuevaEspecie = new EspecieHerbivoro(codigo, nombreEspecie, periodo, peso, plantaPreferida);
+                // Constructor sin ID
+                nuevaEspecie = new EspecieHerbivoro(nombreEspecie, periodo, peso, plantaPreferida);
             }
 
-            // 5. Registrar en memoria mediante el Gestor y actualizar la TableView
-            gestor.agregarEspecie(nuevaEspecie);
-            listaObservable.setAll(gestor.getListaEspecies());
-
+            // 5. Registrar usando el DAO directamente hacia MariaDB
             // Invocación automática del DAO para persistir de inmediato
             try {
-                especieDao.guardarEspecies(gestor.getListaEspecies());
+                // Guardamos el nuevo elemento enviándolo en una lista al DAO
+                especieDao.guardarEspecies(List.of(nuevaEspecie));
             } catch (Exception e) {
-                lblMensaje.setText("Aviso: No se pudo respaldar en el archivo JSON: " + e.getMessage());
+                lblMensaje.setText("Aviso: No se pudo guardar en la Base de Datos: " + e.getMessage());
             }
 
-            // 6. Limpiar formulario y reportar éxito al usuario
+            // 6. Recargar los datos desde la Base de Datos para refrescar la tabla con el ID real generado
+            List<EspecieDinosaurio> especiesActualizadas = especieDao.cargarEspecies();
+            gestor.getListaEspecies().clear();
+            for (EspecieDinosaurio dino : especiesActualizadas) {
+                gestor.agregarEspecie(dino);
+            }
+            listaObservable.setAll(gestor.getListaEspecies());
+
+            // 7. Limpiar formulario y reportar éxito
             limpiarFormulario();
-            lblMensaje.setText("¡Especie registrada correctamente en el sistema!");
+            lblMensaje.setStyle("-fx-text-fill: #27ae60;");
+            lblMensaje.setText("¡Especie registrada correctamente en MariaDB!");
 
         } catch (DatoInvalidoException e) {
             // Manejo de reglas de negocio personalizadas
